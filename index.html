@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>S4n - Fundação SCP</title>
+<style>
+  body {
+    background: black;
+    color: #0f0;
+    font-family: 'Courier New', monospace;
+    margin: 0;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    user-select: none;
+    overflow-x: hidden;
+    padding: 20px;
+    text-align: center;
+  }
+  #texto {
+    white-space: pre-wrap;
+    font-size: 1.2em;
+    min-height: 120px;
+    max-width: 600px;
+  }
+  #opcoes {
+    margin-top: 20px;
+  }
+  button {
+    background: black;
+    border: 2px solid #0f0;
+    color: #0f0;
+    font-family: 'Courier New', monospace;
+    font-size: 1em;
+    padding: 10px 15px;
+    margin: 0 10px;
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.3s, color 0.3s;
+  }
+  button:hover {
+    background: #0f0;
+    color: black;
+  }
+  .hidden {
+    display: none;
+  }
+  /* Glitch effect */
+  .glitch {
+    position: relative;
+    color: #0f0;
+    animation: glitchAnim 1.5s infinite;
+  }
+  @keyframes glitchAnim {
+    0% {
+      text-shadow:
+        2px 0 red,
+        -2px 0 cyan;
+    }
+    20% {
+      text-shadow:
+        -2px 0 red,
+        2px 0 cyan;
+    }
+    40% {
+      text-shadow:
+        2px 0 cyan,
+        -2px 0 red;
+    }
+    60% {
+      text-shadow:
+        -2px 0 cyan,
+        2px 0 red;
+    }
+    80% {
+      text-shadow:
+        2px 0 red,
+        -2px 0 cyan;
+    }
+    100% {
+      text-shadow:
+        -2px 0 red,
+        2px 0 cyan;
+    }
+  }
+</style>
+</head>
+<body>
+
+<div id="conteudo">
+
+  <div id="perguntaNome">
+    <label for="inputNome" style="color:#0f0; font-family:'Courier New', monospace; font-size:1.2em;">
+      Identifique-se, agente:
+    </label><br />
+    <input id="inputNome" type="text" style="background:black; color:#0f0; border: 1px solid #0f0; font-family:'Courier New', monospace; font-size:1.2em; padding:5px; margin-top:5px;" />
+    <button id="btnNome" style="margin-left: 10px;">Confirmar</button>
+  </div>
+
+  <div id="interacao" class="hidden">
+    <div id="texto"></div>
+    <div id="opcoes" class="hidden">
+      <button id="simBtn">Aceito</button>
+      <button id="naoBtn">Negar</button>
+    </div>
+    <button id="voltarVideoBtn" class="hidden">Acessar arquivo</button>
+  </div>
+
+  <audio id="audioGlitch" loop src="https://cdn.jsdelivr.net/gh/jbrown/ambient-noise@master/noises/digital-glitch-02.mp3"></audio>
+
+</div>
+
+<script>
+  const perguntaNome = document.getElementById("perguntaNome");
+  const inputNome = document.getElementById("inputNome");
+  const btnNome = document.getElementById("btnNome");
+  const interacao = document.getElementById("interacao");
+  const textoEscrito = document.getElementById("texto");
+  const opcoes = document.getElementById("opcoes");
+  const simBtn = document.getElementById("simBtn");
+  const naoBtn = document.getElementById("naoBtn");
+  const voltarVideoBtn = document.getElementById("voltarVideoBtn");
+  const audioGlitch = document.getElementById("audioGlitch");
+
+  let nomeUsuario = "";
+
+  // Função para escrever texto com efeito digitando e opcional glitch
+  function escreverTexto(texto, callback, glitch = false) {
+    textoEscrito.classList.remove("glitch");
+    if (glitch) {
+      textoEscrito.classList.add("glitch");
+      if (audioGlitch.paused) {
+        audioGlitch.play();
+      }
+    } else {
+      textoEscrito.classList.remove("glitch");
+      audioGlitch.pause();
+      audioGlitch.currentTime = 0;
+    }
+
+    textoEscrito.textContent = "";
+    let i = 0;
+    let intervalo = setInterval(() => {
+      textoEscrito.textContent += texto.charAt(i);
+      i++;
+      if (i >= texto.length) {
+        clearInterval(intervalo);
+        if (callback) callback();
+      }
+    }, 40);
+  }
+
+  function mostrarBotaoVideo() {
+    voltarVideoBtn.classList.remove("hidden");
+  }
+
+  btnNome.onclick = () => {
+    if(inputNome.value.trim() === "") {
+      alert("Informe seu código de agente.");
+      return;
+    }
+    nomeUsuario = inputNome.value.trim();
+    perguntaNome.classList.add("hidden");
+    interacao.classList.remove("hidden");
+    iniciarConversa();
+  };
+
+  function iniciarConversa() {
+    escreverTexto(`Agente ${nomeUsuario}, o sistema detectou uma anomalia digital.\nRelata-se que ela interfere em conexões e distorce a realidade visual.\nVocê confirma o reconhecimento da entidade SCP-ΔX9?`, () => {
+      opcoes.classList.remove("hidden");
+      simBtn.textContent = "Aceito";
+      naoBtn.textContent = "Negar";
+
+      simBtn.onclick = () => {
+        opcoes.classList.add("hidden");
+        escreverTexto(`Reconhecimento confirmado.\nIniciando protocolo de contenção...\n\nSCP-ΔX9 manifesta-se como pixels corrompidos e distorções na matriz digital.\nA interação pode resultar em efeitos psicológicos adversos.\n\nProceda com cautela, agente ${nomeUsuario}.`, () => {
+          opcoes.classList.remove("hidden");
+          simBtn.textContent = "Prosseguir";
+          naoBtn.textContent = "Desconectar";
+
+          simBtn.onclick = () => {
+            opcoes.classList.add("hidden");
+            escreverTexto(`Iniciando interface...\nSistema comprometido. A rachadura na matriz se expande.\nAgente ${nomeUsuario}, você está preso no domínio digital da SCP-ΔX9.\n\nResponda aos comandos para manter sua sanidade.`, () => {
+              mostrarBotaoVideo();
+            }, true); // ativa glitch na última fala
+          };
+
+          naoBtn.onclick = () => {
+            opcoes.classList.add("hidden");
+            textoEscrito.textContent = "Sessão encerrada pelo agente.";
+            simBtn.onclick = null;
+            naoBtn.onclick = null;
+            audioGlitch.pause();
+            mostrarBotaoVideo();
+          };
+        }, true); // glitch na fala intermediária
+      };
+
+      naoBtn.onclick = () => {
+        opcoes.classList.add("hidden");
+        textoEscrito.textContent = "Reconhecimento negado. Encerrando sessão.";
+        simBtn.onclick = null;
+        naoBtn.onclick = null;
+        audioGlitch.pause();
+        mostrarBotaoVideo();
+      };
+    }, false);
+  }
+
+  voltarVideoBtn.onclick = () => {
+    // Substitua esse link pelo do seu vídeo
+    window.location.href = "https://www.youtube.com/watch?v=bNDQxl9qU1M&t=474s";
+  };
+</script>
+
+</body>
+</html>
